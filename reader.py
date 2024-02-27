@@ -7,23 +7,12 @@ class Reader:
     def __init__(self):
         self.reader = easyocr.Reader(['en'], detector='dbnet18')
 
-        # galaxy_picker | my_board | augment_selection | enemy_board | item_picker | game_end 
-        # This data is obtained via the stage number at the top
-        self.game_state = 'galaxy_picker'
-
-        # formatted to an int for easier usage 1-1=11, 2-4=24...
+        # Formatted from strings to ints for easier use ("1-1"=11)
         self.stage = 21 #None
 
-    
-    def get_game_stage(self):
-        if self.stage is None or self.stage < 21:
-            self.crop('./test/galaxy-picker.png', 820, 0, 870, 35, 'images/stage-number.png') # HARD CODED FOR TESTING
-            stage_raw = self.read_image('./images/stage-number.png')
-            self.stage = int(stage_raw[0][0] + stage_raw[0][2])
-        else:
-            self.crop('./test/board.png', 770, 0, 810, 35, 'images/stage-number.png')
-            stage_raw = self.read_image('./images/stage-number.png')
-            self.stage = int(stage_raw[0][0] + stage_raw[0][2])
+        self.galaxy_options = [] 
+        self.galaxy = None
+
 
     def read_image(self, path):
         prediction = self.reader.recognize(path, detail=0)
@@ -44,7 +33,37 @@ class Reader:
         im = Image.open(read_path)
         im1 = im.crop((left, top, right, bottom))
         im1.save(save_path)
+    
+
+    def get_game_stage(self):
+        if self.stage is None or self.stage < 21:
+            self.crop('./test/galaxy-picker.png', 820, 0, 870, 35, 'images/stage-number.png') # HARD CODED FOR TESTING
+            stage_raw = self.read_image('./images/stage-number.png')
+            self.stage = int(stage_raw[0][0] + stage_raw[0][2])
+            
+            # Invoke galaxy parser
+            if self.stage == 11:
+                self.get_galaxy_options()
+
+        else:
+            self.crop('./test/board.png', 770, 0, 810, 35, 'images/stage-number.png') # HARD CODED FOR TESTING
+            stage_raw = self.read_image('./images/stage-number.png')
+            self.stage = int(stage_raw[0][0] + stage_raw[0][2])
+
+    def get_galaxy_options(self):
+        left = 62
+        start_top = 315
+        right = 190
+        start_bottom = 375
+
+        for i in range(0, 3):
+            top = (start_top + (i * 90))
+            bottom = (start_bottom + (i * 90))
+            self.crop('./test/galaxy-picker.png', left, top, right, bottom, f'images/galaxy-option-{i}.png') # HARD CODED FOR TESTING
+            option_raw = self.read_image(f'images/galaxy-option-{i}.png')
+            self.galaxy_options.append(option_raw[0])
 
 if __name__ == "__main__":
     r = Reader()
     r.get_game_stage()
+    r.get_galaxy_options()
