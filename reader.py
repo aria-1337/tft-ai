@@ -12,17 +12,18 @@ class Reader:
         self.game_state = 'galaxy_picker'
 
         # formatted to an int for easier usage 1-1=11, 2-4=24...
-        self.stage = None
+        self.stage = 21 #None
 
     
     def get_game_stage(self):
-        # Different position for early stages
         if self.stage is None or self.stage < 21:
             self.crop('./test/galaxy-picker.png', 820, 0, 870, 35, 'images/stage-number.png') # HARD CODED FOR TESTING
             stage_raw = self.read_image('./images/stage-number.png')
-            print(stage_raw)
             self.stage = int(stage_raw[0][0] + stage_raw[0][2])
-            print(self.stage)
+        else:
+            self.crop('./test/board.png', 770, 0, 810, 35, 'images/stage-number.png')
+            stage_raw = self.read_image('./images/stage-number.png')
+            self.stage = int(stage_raw[0][0] + stage_raw[0][2])
 
     def read_image(self, path):
         prediction = self.reader.recognize(path, detail=0)
