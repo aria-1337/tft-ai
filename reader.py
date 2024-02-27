@@ -13,6 +13,8 @@ class Reader:
         self.galaxy_options = [] 
         self.galaxy = None
 
+        self.gold = 0
+
 
     def read_image(self, path):
         prediction = self.reader.recognize(path, detail=0)
@@ -63,7 +65,17 @@ class Reader:
             option_raw = self.read_image(f'images/galaxy-option-{i}.png')
             self.galaxy_options.append(option_raw[0])
 
+    def get_augments_and_galaxy(self):
+        # TODO: This should get invoked on 1-2, and every augment picking stage, will have to right click boombox and screenshot to get info
+        return None
+
+    def get_gold(self):
+        self.crop('./test/board.png', 840, 880, 920, 910, 'images/gold.png') # HARD CODED FOR TESTING
+        gold_raw = self.read_image('./images/gold.png')
+        self.gold = gold_raw
+        print(self.gold)
+
 if __name__ == "__main__":
     r = Reader()
-    r.get_game_stage()
-    r.get_galaxy_options()
+    r.get_gold()
+
