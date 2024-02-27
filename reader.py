@@ -1,29 +1,49 @@
 import easyocr
 import os
-from mss import mss
+import mss
+from PIL import Image
 
 class Reader:
     def __init__(self):
-        self.reader = easyocr.Reader(['en'])
+        self.reader = easyocr.Reader(['en'], detector='dbnet18')
 
-        # galaxy-picker | my-board | augment-selection | enemy-board | item-picker | game-end 
-        # Games always start on galaxy-picker
-        self.game_state = "galaxy-picker"
+        # galaxy_picker | my_board | augment_selection | enemy_board | item_picker | game_end 
+        # This data is obtained via the stage number at the top
+        self.game_state = 'galaxy_picker'
 
-    def update_game_state(self, new_state):
-        self.game_state = new_state
+        # formatted to an int for easier usage 1-1=11, 2-4=24...
+        self.stage = None
+
+    
+    def get_game_stage(self):
+        # Different position for early stages
+        if self.stage is None or self.stage < 21:
+            self.crop('./test/galaxy-picker.png', 820, 0, 870, 35, 'images/stage-number.png') # HARD CODED FOR TESTING
+            stage_raw = self.read_image('./images/stage-number.png')
+            print(stage_raw)
+            self.stage = int(stage_raw[0][0] + stage_raw[0][2])
+            print(self.stage)
 
     def read_image(self, path):
         prediction = self.reader.recognize(path, detail=0)
         return prediction
 
-    # Idk if cropping would be faster than taking individual segments...
-    def screenshot_area(self, top, left, width, height, name):
-        with mss.mss() as sct:
-            monitor = {"top": top, "left": left, "width": width, height: height}
-            output = "sct-{top}x{left}_{width}x{height}.png".format(**mointor)
 
-            sct_img = sct.grab(mointor)
+    def screenshot(self):
+        with mss.mss() as sct:
+            monitor = {"top": 0, "left": 0, "width": 1920, "height": 1080}
+            output = "sct-{top}x{left}_{width}x{height}.png".format(**monitor)
+
+            sct_img = sct.grab(monitor)
 
             mss.tools.to_png(sct_img.rgb, sct_img.size, output=output)
-            os.rename(output, name)
+            os.rename(output, 'images/screenshot.png')
+
+    def crop(self, read_path, left, top, right, bottom, save_path):
+        im = Image.open(read_path)
+        im1 = im.crop((left, top, right, bottom))
+        im1.save(save_path)
+
+if __name__ == "__main__":
+    r = Reader()
+    r.get_game_stage()
