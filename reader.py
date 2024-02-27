@@ -5,6 +5,8 @@ from PIL import Image
 
 class Reader:
     def __init__(self):
+        # This thing is relatively good, but it still needs to be trained or we need to normalize
+        # some text formatting from the output
         self.reader = easyocr.Reader(['en'], detector='dbnet18')
 
         # Formatted from strings to ints for easier use ("1-1"=11)
@@ -75,7 +77,13 @@ class Reader:
         self.gold = gold_raw
         print(self.gold)
 
+    def get_augments(self):
+        # TODO: This either needs to be trained to recognize the numbers more clearly
+        # or we need to just right click each square on the board to get an accurate count
+        # of each unit on the board.
+             
+
+
 if __name__ == "__main__":
     r = Reader()
-    r.get_gold()
-
+    r.get_augments()
