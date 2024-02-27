@@ -19,5 +19,16 @@ class Game_Controller:
         pyautogui.mouseDown();
         pyautogui.mouseUp(x = toXY[0], y= toXY[1])
 
-    def key_press(self, key):
-        pyautogui.press(key)
+    def buy_exp(self):
+        pyautogui.press('f')
+
+    def roll_shop(self):
+        pyautogui.press('d')
+
+    def sell_unit(self, bench_pos):
+        self.set_mouse_pos(bench_pos[0], bench_pos[1])
+        pyautogui.press('d')
+
+    # TODO: Augment choosing 
+    # TODO: Galaxy picking
+    # TODO: Radiant item picker
