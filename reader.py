@@ -1,12 +1,18 @@
 import easyocr
+import time
 import os
 import mss
+from game_controller import Game_Controller
 from PIL import Image
 
 class Reader:
     def __init__(self):
+        # Game controller (to get information only available via mouse/keyboard navigation)
+        self.gc = Game_Controller()
+        self.game_positions = {}
+        self.generate_position_matrix()
+
         # This thing is relatively good, but it still needs to be trained or we need to normalize
-        # some text formatting from the output
         self.reader = easyocr.Reader(['en'], detector='dbnet18')
 
         # Formatted from strings to ints for easier use ("1-1"=11)
@@ -17,21 +23,51 @@ class Reader:
 
         self.gold = 0
 
+    def generate_position_matrix(self):
+        # UNITS, TODO: Can probably make this neater
+        self.game_positions['units'] = []
+        x_offset = 135
+        row1_x_start = 570
+        row1_y = 660
+        row1 = []
+        row2_x_start = 535
+        row2_y = 590
+        row2 = []
+        row3_x_start = 600
+        row3_y = 500
+        row3 = []
+        row4_x_start = 560
+        row4_y = 420
+        row4 = []
+        for i in range(0, 7):
+            x1 = row1_x_start + (i * x_offset)
+            x2 = row2_x_start + (i * x_offset-40)
+            x3 = row3_x_start + (i * x_offset-50)
+            x4 = row4_x_start + (i * x_offset-60)
+            row1.append([x1, row1_y])
+            row2.append([x2, row2_y])
+            row3.append([x3, row3_y])
+            row4.append([x4, row4_y])
+
+        self.game_positions['units'].append(row1)
+        self.game_positions['units'].append(row2)
+        self.game_positions['units'].append(row3)
+        self.game_positions['units'].append(row4)
 
     def read_image(self, path):
         prediction = self.reader.recognize(path, detail=0)
         return prediction
 
 
-    def screenshot(self):
+    def screenshot(self, top, left, width, height, path='images/screenshot.png'):
         with mss.mss() as sct:
-            monitor = {"top": 0, "left": 0, "width": 1920, "height": 1080}
+            monitor = {"top": top, "left": left, "width": width, "height": height}
             output = "sct-{top}x{left}_{width}x{height}.png".format(**monitor)
 
             sct_img = sct.grab(monitor)
 
             mss.tools.to_png(sct_img.rgb, sct_img.size, output=output)
-            os.rename(output, 'images/screenshot.png')
+            os.rename(output, path)
 
     def crop(self, read_path, left, top, right, bottom, save_path):
         im = Image.open(read_path)
@@ -77,13 +113,7 @@ class Reader:
         self.gold = gold_raw
         print(self.gold)
 
-    def get_augments(self):
-        # TODO: This either needs to be trained to recognize the numbers more clearly
-        # or we need to just right click each square on the board to get an accurate count
-        # of each unit on the board.
              
-
-
 if __name__ == "__main__":
+    time.sleep(3)
     r = Reader()
-    r.get_augments()

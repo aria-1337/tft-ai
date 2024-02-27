@@ -13,5 +13,5 @@ with mss.mss() as sct:
     sct_img = sct.grab(monitor)
 
     mss.tools.to_png(sct_img.rgb, sct_img.size, output=output)
-    os.rename(output, f'test/x-{current_time}')
+    os.rename(output, f'test/x-{current_time}.png')
 
